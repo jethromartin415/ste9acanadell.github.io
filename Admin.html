@@ -1,0 +1,18 @@
+<!DOCTYPE html><html><head><base target="_top"><meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+body{font-family:Arial;background:#f4f7fb;margin:0;padding:20px;color:#172033}.wrap{max-width:1000px;margin:auto}.card{background:white;border-radius:16px;padding:22px;margin-bottom:18px;box-shadow:0 6px 24px #0001}.qrbox{text-align:center}.qr{display:inline-block;padding:20px;border:1px solid #ddd;border-radius:14px}.stats{display:flex;gap:12px;flex-wrap:wrap}.stat{padding:16px;border-radius:12px;background:#eef4ff;min-width:120px}button{padding:11px 16px;border:0;border-radius:9px;background:#172033;color:white;cursor:pointer}table{width:100%;border-collapse:collapse}td,th{padding:9px;border-bottom:1px solid #eee;text-align:left}.small{font-size:13px;color:#667085}
+</style></head><body><div class="wrap">
+<div class="card"><h1>STE9A Canada — Admin</h1><p>Daily rotating QR code. Generate/display today's code in class.</p><button onclick="load()">Refresh</button></div>
+<div class="card qrbox"><h2 id="date">Today's QR</h2><div class="qr"><div id="qrcode"></div></div><p class="small">This QR changes automatically each day. Students must scan this classroom QR before entering their Student ID.</p></div>
+<div class="card"><h2>Today</h2><div id="stats" class="stats">Loading…</div></div>
+<div class="card"><h2>Attendance</h2><div id="attendance">Loading…</div></div>
+</div>
+<script>
+function load(){google.script.run.withSuccessHandler(showQR).getTodayQR();google.script.run.withSuccessHandler(showSummary).getAttendanceSummary();google.script.run.withSuccessHandler(showAttendance).getAttendance();}
+function showQR(x){document.getElementById("date").textContent="Today's QR — "+x.date;document.getElementById("qrcode").innerHTML="";new QRCode(document.getElementById("qrcode"),{text:x.url,width:260,height:260});}
+function showSummary(s){document.getElementById("stats").innerHTML='<div class="stat"><b>'+s.present+'</b><br>Present</div><div class="stat"><b>'+s.late+'</b><br>Late</div><div class="stat"><b>'+s.absent.length+'</b><br>Absent / Not checked in</div><div class="stat"><b>'+s.total+'</b><br>Total</div>';}
+function showAttendance(rows){if(!rows.length){document.getElementById("attendance").textContent="No check-ins yet.";return;}let h="<table><tr><th>Time</th><th>ID</th><th>Name</th><th>Status</th></tr>";rows.forEach(r=>h+="<tr><td>"+new Date(r.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})+"</td><td>"+esc(r.id)+"</td><td>"+esc(r.name)+"</td><td>"+esc(r.status)+"</td></tr>");document.getElementById("attendance").innerHTML=h+"</table>";}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+load();
+</script></body></html>

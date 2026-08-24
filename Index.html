@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html><head><base target="_top"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+body{font-family:Arial;background:#f4f7fb;margin:0;padding:20px;color:#172033}.card{max-width:480px;margin:30px auto;background:white;border-radius:18px;padding:28px;box-shadow:0 8px 30px #0001}
+input,button{width:100%;box-sizing:border-box;padding:13px;margin-top:10px;border-radius:10px;border:1px solid #ccd3df;font-size:16px}button{background:#172033;color:white;cursor:pointer}.status{margin-top:20px;padding:16px;border-radius:12px;background:#eef4ff}.ok{background:#eaf8ef}.bad{background:#fff0f0}.muted{color:#667085}
+</style></head><body><div class="card">
+<h1>STE9A Canada</h1><p class="muted">Daily Attendance Check-In</p>
+<p>Enter your Student ID after scanning today's classroom QR code.</p>
+<input id="id" placeholder="Student ID" autocomplete="off">
+<button onclick="submit()">Record Attendance</button>
+<div id="status" class="status">QR verified. Ready for check-in.</div>
+<p class="muted">Attendance period: <?= startDate ?> to <?= endDate ?></p>
+</div>
+<script>
+const qrToken=<?!=JSON.stringify(qrToken)?>;
+function submit(){
+ const id=document.getElementById("id").value.trim(), el=document.getElementById("status");
+ if(!id){el.className="status bad";el.textContent="Please enter your Student ID.";return;}
+ el.className="status";el.textContent="Recording attendance…";
+ google.script.run.withSuccessHandler(show).checkIn(qrToken,id);
+}
+function show(r){
+ const el=document.getElementById("status");
+ el.className="status "+(r.ok?"ok":"bad");
+ if(r.ok) el.innerHTML="<strong>Attendance recorded!</strong><br>"+esc(r.name)+"<br>"+r.date+" • "+r.time+"<br><br>Status: <strong>"+esc(r.status)+"</strong>";
+ else el.innerHTML="<strong>"+(r.duplicate?"Already recorded":"Unable to check in")+"</strong><br>"+esc(r.message);
+}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+</script></body></html>
